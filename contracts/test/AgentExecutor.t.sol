@@ -64,7 +64,9 @@ contract AgentExecutorTest is Test {
     function test_setPolicy_revertsForNonOwner() public {
         address[] memory recipients = new address[](0);
         vm.prank(agent);
-        vm.expectRevert(AgentExecutor.Unauthorized.selector);
+        vm.expectRevert(
+            abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", agent)
+        );
         executor.setPolicy(LIMIT, recipients);
     }
 

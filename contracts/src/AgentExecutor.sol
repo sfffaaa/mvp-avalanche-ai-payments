@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract AgentExecutor {
-    address public owner;
+contract AgentExecutor is Ownable {
+    using SafeERC20 for IERC20;
+
     address public agent;
     IERC20 public usdc;
 
@@ -17,18 +20,12 @@ contract AgentExecutor {
     error RecipientNotAllowed();
     error Unauthorized();
 
-    modifier onlyOwner() {
-        if (msg.sender != owner) revert Unauthorized();
-        _;
-    }
-
     modifier onlyAgent() {
         if (msg.sender != agent) revert Unauthorized();
         _;
     }
 
-    constructor(address _usdc, address _agent) {
-        owner = msg.sender;
+    constructor(address _usdc, address _agent) Ownable(msg.sender) {
         agent = _agent;
         usdc = IERC20(_usdc);
     }
@@ -53,7 +50,7 @@ contract AgentExecutor {
         }
         if (!allowed) revert RecipientNotAllowed();
 
-        usdc.transfer(to, amount);
+        usdc.safeTransfer(to, amount);
         emit PaymentExecuted(to, amount);
     }
 
