@@ -1,15 +1,16 @@
 import { makeClient, runFoodAPI, runAPICredits, runFreelancer } from "../src/scenarios.js";
 
-const EXECUTOR_ADDRESS = process.env.EXECUTOR_ADDRESS as `0x${string}`;
-const AGENT_PK = process.env.AGENT_PK as `0x${string}`;
-
-if (!EXECUTOR_ADDRESS || !AGENT_PK) {
-  console.error(
-    "Missing env vars. Set EXECUTOR_ADDRESS and AGENT_PK.\n" +
-    "See README for how to deploy contracts to Fuji first."
-  );
-  process.exit(1);
+function requireHex(name: string): `0x${string}` {
+  const val = process.env[name];
+  if (!val || !val.startsWith("0x")) {
+    console.error(`Missing or invalid env var ${name} — must be a hex string starting with 0x`);
+    process.exit(1);
+  }
+  return val as `0x${string}`;
 }
+
+const EXECUTOR_ADDRESS = requireHex("EXECUTOR_ADDRESS");
+const AGENT_PK = requireHex("AGENT_PK");
 
 const client = makeClient(EXECUTOR_ADDRESS, AGENT_PK);
 

@@ -31,6 +31,8 @@ contract AgentExecutor is Ownable {
     }
 
     function setPolicy(uint256 _spendingLimitPerTx, address[] calldata _allowedRecipients) external onlyOwner {
+        require(_spendingLimitPerTx > 0, "limit must be > 0");
+        require(_allowedRecipients.length > 0, "recipients list cannot be empty");
         spendingLimitPerTx = _spendingLimitPerTx;
         delete allowedRecipients;
         for (uint256 i = 0; i < _allowedRecipients.length; i++) {
