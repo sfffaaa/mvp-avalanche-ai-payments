@@ -10,6 +10,11 @@ const config: Config = {
     "^.+\\.tsx?$": ["ts-jest", { useESM: true }],
   },
   testEnvironment: "node",
+  testPathIgnorePatterns: [
+    "node_modules/",
+    "dist/",
+    "contracts/lib/",
+  ],
 };
 
 export default config;
