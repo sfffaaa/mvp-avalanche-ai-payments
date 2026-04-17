@@ -4,7 +4,7 @@ import { avalancheFuji } from "viem/chains";
 import { checkPolicy } from "./policy.js";
 import type { Policy, TxRequest } from "./types.js";
 
-const RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc";
+const RPC_URL = "https://avalanche-fuji-c-chain-rpc.publicnode.com";
 
 const EXECUTOR_ABI = [
   {
