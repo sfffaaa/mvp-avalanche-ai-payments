@@ -3,7 +3,7 @@ import { makeClient, runFoodAPI, runAPICredits, runFreelancer } from "../src/sce
 
 function requireHex(name: string): `0x${string}` {
   const val = process.env[name];
-  if (!val || !val.startsWith("0x")) {
+  if (!val || !val.startsWith("0x") || val.length <= 2) {
     console.error(`Missing or invalid env var ${name} — must be a hex string starting with 0x`);
     process.exit(1);
   }

@@ -39,6 +39,7 @@ contract AgentExecutor is Ownable {
         spendingLimitPerTx = _spendingLimitPerTx;
         delete allowedRecipients;
         for (uint256 i = 0; i < _allowedRecipients.length; i++) {
+            require(_allowedRecipients[i] != address(0), "zero address not allowed");
             allowedRecipients.push(_allowedRecipients[i]);
         }
         emit PolicySet(_spendingLimitPerTx, _allowedRecipients.length);
