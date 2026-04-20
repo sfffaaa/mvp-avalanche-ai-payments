@@ -65,7 +65,10 @@ npm test
 | Rule | Value |
 |------|-------|
 | Max per transaction | 10 mUSDC |
+| Min amount | > 0 mUSDC (zero rejected on both layers) |
+| Amount precision | Max 6 decimal places (USDC precision) |
 | Allowed recipients | Restaurant, API Provider, Freelancer (hardcoded test addresses) |
+| Address validation | Must be a valid EVM address (checksum-aware) |
 
 ## Not in Scope
 
