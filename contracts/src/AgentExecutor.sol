@@ -15,7 +15,7 @@ contract AgentExecutor is Ownable {
     address[] private allowedRecipients;
 
     event PaymentExecuted(address indexed to, uint256 amount);
-    event PolicySet(uint256 spendingLimitPerTx, address[] allowedRecipients);
+    event PolicySet(uint256 spendingLimitPerTx, uint256 recipientCount);
 
     error LimitExceeded();
     error RecipientNotAllowed();
@@ -41,10 +41,11 @@ contract AgentExecutor is Ownable {
         for (uint256 i = 0; i < _allowedRecipients.length; i++) {
             allowedRecipients.push(_allowedRecipients[i]);
         }
-        emit PolicySet(_spendingLimitPerTx, _allowedRecipients);
+        emit PolicySet(_spendingLimitPerTx, _allowedRecipients.length);
     }
 
     function execute(address to, uint256 amount) external onlyAgent {
+        if (amount == 0) revert LimitExceeded();
         if (amount > spendingLimitPerTx) revert LimitExceeded();
 
         bool allowed = false;

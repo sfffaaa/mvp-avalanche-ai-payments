@@ -70,4 +70,11 @@ describe("checkPolicy", () => {
     expect(result.decision).toBe("reject");
     expect(result.reason).toBe("amount_exceeds_limit");
   });
+
+  it("rejects amount with more than 6 decimal places", () => {
+    const tx: TxRequest = { ...ALLOWED_TX, amount: "0.0000001" };
+    const result = checkPolicy(tx, POLICY);
+    expect(result.decision).toBe("reject");
+    expect(result.reason).toBe("amount_exceeds_limit");
+  });
 });
