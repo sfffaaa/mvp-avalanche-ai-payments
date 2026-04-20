@@ -36,7 +36,7 @@ cd contracts && forge install OpenZeppelin/openzeppelin-contracts --no-commit &&
 export DEPLOYER_PK=0x<your-private-key>
 cd contracts
 forge script script/Deploy.s.sol \
-  --rpc-url https://api.avax-test.network/ext/bc/C/rpc \
+  --rpc-url https://avalanche-fuji-c-chain-rpc.publicnode.com \
   --broadcast \
   --legacy
 ```
@@ -46,7 +46,7 @@ Copy the deployed addresses into `.env` (see `.env.example`).
 ### Run Demo
 
 ```bash
-source .env
+export $(cat .env | xargs)
 npm run demo
 ```
 
