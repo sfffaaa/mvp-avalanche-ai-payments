@@ -1,5 +1,5 @@
-import { createWalletClient, http, parseUnits } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { createWalletClient, http, parseUnits, type WalletClient } from "viem";
+import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 import { avalancheFuji } from "viem/chains";
 import { checkPolicy } from "./policy.js";
 import type { Policy, TxRequest } from "./types.js";
@@ -22,7 +22,8 @@ const EXECUTOR_ABI = [
 export class AgentExecutorClient {
   private policy: Policy;
   private executorAddress: `0x${string}`;
-  private privateKey: `0x${string}`;
+  private account: PrivateKeyAccount;
+  private walletClient: WalletClient;
 
   constructor(opts: {
     policy: Policy;
@@ -31,26 +32,22 @@ export class AgentExecutorClient {
   }) {
     this.policy = opts.policy;
     this.executorAddress = opts.executorAddress;
-    this.privateKey = opts.privateKey;
+    this.account = privateKeyToAccount(opts.privateKey);
+    this.walletClient = createWalletClient({
+      account: this.account,
+      chain: avalancheFuji,
+      transport: http(RPC_URL),
+    });
   }
 
   async execute(tx: TxRequest): Promise<{ hash: `0x${string}` }> {
-    // Layer 1: off-chain policy check (no gas)
     const result = checkPolicy(tx, this.policy);
     if (result.decision === "reject") {
       throw new Error(`PolicyViolation: ${result.reason}`);
     }
 
-    // Layer 2: on-chain execute (contract re-enforces same limits)
-    const account = privateKeyToAccount(this.privateKey);
-    const walletClient = createWalletClient({
-      account,
-      chain: avalancheFuji,
-      transport: http(RPC_URL),
-    });
-
-    const hash = await walletClient.writeContract({
-      account,
+    const hash = await this.walletClient.writeContract({
+      account: this.account,
       address: this.executorAddress,
       abi: EXECUTOR_ABI,
       functionName: "execute",

@@ -1,3 +1,4 @@
+import { AgentExecutorClient } from "../src/agent.js";
 import { makeClient, runFoodAPI, runAPICredits, runFreelancer } from "../src/scenarios.js";
 
 function requireHex(name: string): `0x${string}` {
@@ -7,6 +8,28 @@ function requireHex(name: string): `0x${string}` {
     process.exit(1);
   }
   return val as `0x${string}`;
+}
+
+function errorMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
+async function runScenario(
+  label: string,
+  fn: (client: AgentExecutorClient) => Promise<{ hash: `0x${string}` }>,
+  client: AgentExecutorClient,
+  successLabel: string
+): Promise<void> {
+  console.log(label);
+  try {
+    const { hash } = await fn(client);
+    console.log("  off-chain policy: APPROVE");
+    console.log("  tx hash:", hash);
+    console.log("  ✓", successLabel);
+  } catch (e) {
+    console.log("  ✗", errorMessage(e));
+  }
+  console.log("");
 }
 
 const EXECUTOR_ADDRESS = requireHex("EXECUTOR_ADDRESS");
@@ -20,37 +43,15 @@ async function run() {
   console.log("Executor:", EXECUTOR_ADDRESS);
   console.log("");
 
-  // Scenario 1: Food API
-  console.log("[1/3] Food API payment (5 mUSDC)...");
-  try {
-    const { hash } = await runFoodAPI(client);
-    console.log("  off-chain policy: APPROVE");
-    console.log("  tx hash:", hash);
-    console.log("  ✓ 5 mUSDC sent to restaurant");
-  } catch (e) {
-    console.log("  ✗", (e as Error).message);
-  }
-  console.log("");
+  await runScenario("[1/3] Food API payment (5 mUSDC)...", runFoodAPI, client, "5 mUSDC sent to restaurant");
+  await runScenario("[2/3] API credits payment (2 mUSDC)...", runAPICredits, client, "2 mUSDC sent to API provider");
 
-  // Scenario 2: API Credits
-  console.log("[2/3] API credits payment (2 mUSDC)...");
-  try {
-    const { hash } = await runAPICredits(client);
-    console.log("  off-chain policy: APPROVE");
-    console.log("  tx hash:", hash);
-    console.log("  ✓ 2 mUSDC sent to API provider");
-  } catch (e) {
-    console.log("  ✗", (e as Error).message);
-  }
-  console.log("");
-
-  // Scenario 3: Freelancer — intentionally exceeds cap
   console.log("[3/3] Freelancer payment (20 mUSDC, cap = 10 mUSDC)...");
   try {
     await runFreelancer(client);
     console.log("  (unexpected: should have been rejected)");
   } catch (e) {
-    const msg = (e as Error).message;
+    const msg = errorMessage(e);
     if (msg.includes("PolicyViolation")) {
       console.log("  off-chain policy: REJECT — amount_exceeds_limit");
       console.log("  ✗ Blocked before hitting chain");
