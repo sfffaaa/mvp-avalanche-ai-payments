@@ -15,6 +15,7 @@ contract AgentExecutor is Ownable {
     address[] private allowedRecipients;
 
     event PaymentExecuted(address indexed to, uint256 amount);
+    event PolicySet(uint256 spendingLimitPerTx, address[] allowedRecipients);
 
     error LimitExceeded();
     error RecipientNotAllowed();
@@ -26,6 +27,8 @@ contract AgentExecutor is Ownable {
     }
 
     constructor(address _usdc, address _agent) Ownable(msg.sender) {
+        require(_usdc != address(0), "invalid usdc");
+        require(_agent != address(0), "invalid agent");
         agent = _agent;
         usdc = IERC20(_usdc);
     }
@@ -38,6 +41,7 @@ contract AgentExecutor is Ownable {
         for (uint256 i = 0; i < _allowedRecipients.length; i++) {
             allowedRecipients.push(_allowedRecipients[i]);
         }
+        emit PolicySet(_spendingLimitPerTx, _allowedRecipients);
     }
 
     function execute(address to, uint256 amount) external onlyAgent {

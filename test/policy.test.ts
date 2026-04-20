@@ -49,4 +49,25 @@ describe("checkPolicy", () => {
     expect(result.decision).toBe("reject");
     expect(result.reason).toBe("recipient_not_allowed");
   });
+
+  it("rejects invalid address", () => {
+    const tx: TxRequest = { ...ALLOWED_TX, to: "0xinvalid" as `0x${string}` };
+    const result = checkPolicy(tx, POLICY);
+    expect(result.decision).toBe("reject");
+    expect(result.reason).toBe("recipient_not_allowed");
+  });
+
+  it("rejects zero amount", () => {
+    const tx: TxRequest = { ...ALLOWED_TX, amount: "0" };
+    const result = checkPolicy(tx, POLICY);
+    expect(result.decision).toBe("reject");
+    expect(result.reason).toBe("amount_exceeds_limit");
+  });
+
+  it("rejects non-numeric amount", () => {
+    const tx: TxRequest = { ...ALLOWED_TX, amount: "abc" };
+    const result = checkPolicy(tx, POLICY);
+    expect(result.decision).toBe("reject");
+    expect(result.reason).toBe("amount_exceeds_limit");
+  });
 });
